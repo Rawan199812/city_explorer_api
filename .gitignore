@@ -229,6 +229,6 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/node,macos,linux,windows,webstorm,visualstudiocode
 
-.npm
+# .npm
 .node_modules
 
