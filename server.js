@@ -10,7 +10,11 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 
 app.get('/', (req, res) => {
-    res.send('An alligator approaches!');
+    res.status(200);
+
+    res.send('work!');
 });
 
-app.listen(3000, () => console.log('Gator app listening on port 3000!'));
+app.listen(PORT, () => console.log('app listening on port 3000!'));
+
+
