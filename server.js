@@ -15,7 +15,18 @@ const handelLocation = (request,response)=>{
   const locationData  = new Locations (city,location);
   response.json(locationData );
 };
+const weatherData = [];
+const handelWeather=(request,response)=>{
+  const weather =require('./data/weather.json');
+  let weatherArr = weather.data;
+  weatherArr.forEach(element => {
+    let newW = new Weather(element.weather.description,element.valid_date);
+    weatherData.push(newW)
+})
+  response.json(weatherData );
+};
 app.get('/location',handelLocation);
+app.get('/weather',handelWeather);
 
 
 //Location  Constructor 
@@ -24,6 +35,15 @@ function Locations(city,location) {
   this.formatted_query =location[0].display_name;
   this.latitude = location[0].lat;
   this.longitude = location[0].lon;
+}
+
+
+
+// Weather Constructor
+function Weather(forecast,time) {
+  this.forecast=forecast;
+  this.time=time; //.toDateString()
+  
 }
 
 const handleRequest = (request, response) => {
