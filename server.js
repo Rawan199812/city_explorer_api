@@ -18,3 +18,16 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => console.log('app listening on port 3000!'));
 
 
+app.get('/location', locationHandler);
+// app.get("/weather", weatherHandler);
+
+function locationHandler(request, response) {
+
+  let cityName = request.query.cityName;
+
+
+}
+
+function getLocation(cityName) {
+    const locationData = require('./data/geo.json');
+}
