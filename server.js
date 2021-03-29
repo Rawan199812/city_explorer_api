@@ -15,13 +15,18 @@ const handelLocation = (request,response)=>{
   const locationData  = new Locations (city,location);
   response.json(locationData );
 };
-const weatherData = [];
+let weatherData = [];
 const handelWeather=(request,response)=>{
   const weather =require('./data/weather.json');
   let weatherArr = weather.data;
-  weatherArr.forEach(element => {
-    let newW = new Weather(element.weather.description,element.valid_date);
-    weatherData.push(newW)
+  // weatherArr.forEach(element => {
+  //   let newW = new Weather(element.weather.description,element.valid_date);
+  //   weatherData.push(newW)
+
+    // use map 
+   weatherData= weatherArr.map(element => {
+    return new Weather(element.weather.description,element.valid_date);
+
 })
   response.json(weatherData );
 };
