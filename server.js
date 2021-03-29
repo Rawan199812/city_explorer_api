@@ -25,9 +25,9 @@ const handelWeather=(request,response)=>{
 })
   response.json(weatherData );
 };
-app.get('/location',handelLocation);
-app.get('/weather',handelWeather);
-
+const handelError = (req,res)=>{
+  res.status(500).send('Sorry, something went wrong');
+};
 
 //Location  Constructor 
 function Locations(city,location) {
@@ -51,7 +51,11 @@ const handleRequest = (request, response) => {
   response.send('work');
 };
 
-app.get('/', handleRequest);
 
+
+app.get('/location',handelLocation);
+app.get('/weather',handelWeather);
+app.get('/', handleRequest);
+app.use('*', handelError);
 app.listen(PORT, () => console.log('app listening on port 3000!'));
 
