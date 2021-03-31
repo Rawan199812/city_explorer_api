@@ -10,23 +10,13 @@ const PORT = process.env.PORT || 3000;
 const PARKS_API_KEY = process.env.PARKS_API_KEY;
 const DATABASE_URL = process.env.DATABASE_URL;
 const NODE_ENV = process.env.NODE_ENV;
+const MOVIE_API_KEY =process.env.MOVIE_API_KEY;
 
 app.use(cors());
 const options = NODE_ENV === 'production' ? { connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } } : { connectionString: DATABASE_URL };
 
 const pg=require('pg');
 const client=new pg.Client(options);
-
-// client.connect()
-//     .then(() => {
-//         // This will only start out webserver if we connected successfully
-//         app.listen(PORT, () => {
-//             console.log(`App listening on port ${PORT}`);
-//         })
-//     }).catch(error => {
-//         console.log('Unable to connect to database: ', error.message);
-//     });
-
 
 function handelLocation (request,response){
   // const city = request.query.city;
@@ -68,11 +58,6 @@ function handelLocation (request,response){
     }).catch(e=>console.log(e.message,'rejected'));
 
 };
-
-
-
-
-  //end  
   app.get('/parks', handelPark);
   function handelPark(request, response) {
     const url = `https://developer.nps.gov/api/v1/parks?parkCode=acad&api_key=${PARKS_API_KEY}`;
@@ -113,7 +98,21 @@ function handelLocation (request,response){
       response.status(500).send('Sorry, something went wrong');
     };  
     
+  function handelMovie(request,response) {
+    const url=`https://api.themoviedb.org/3/movie/550?api_key=${MOVIE_API_KEY}`
+    superagent.get(url)
+    .then(data => {
+      console.log(data.results);
+        const movies = data.results.Data.map(Data => {
+            return new Movie(Data.title,Data.average_votes,Data.total_votes,Data.image_url,Data.popularity,Data.released_on)
+        })
+        response.status(200).send(movies)
+    })
+    .catch(e=>console.log(e.message,'rejected'));    
+
+
     
+  }  
 
   
   //Location  Constructor 
@@ -140,6 +139,17 @@ function handelLocation (request,response){
     this.description = description;
     this.url = url;
 }
+// Movie Constructor
+function Movie(Data) {
+  this.title=title;
+  this.overview=overview;
+  this.average_votes=average_votes;
+  this.total_votes=total_votes;
+  this.image_url=image_url;
+  this.popularity=popularity;
+  this.released_on=released_on;
+  
+}
   
   const handleRequest = (request, response) => {
     console.log(request.query);
@@ -159,6 +169,7 @@ function handelLocation (request,response){
 
 app.get('/location',handelLocation);
 app.get('/weather',handelWeather);
+app.get('/movie',handelMovie)
 app.get('/', handleRequest);
 app.use('*', handelError);
 // app.listen(PORT, () => console.log('app listening on port 3000!'));
