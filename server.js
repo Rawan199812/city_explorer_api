@@ -33,14 +33,16 @@ function handelLocation (request,response){
 
   let key = process.env.GEOCODE_API_KEY;
 
-  const city = request.query.q;
+  const city = request.query.city;
 
   const url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json&limit=1`;
   const select = 'SELECT * FROM locations WHERE search_query = $1';
 
   client.query(select, [city])
     .then(results => {
+      console.log(city);
       if (results.rowCount === 0) {
+
         superagent.get(url)
           .then(data => {
             const geoData = data.body[0];
