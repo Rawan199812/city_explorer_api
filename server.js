@@ -7,6 +7,7 @@ const superagent = require('superagent')
 
 const app = express(); 
 const PORT = process.env.PORT || 3000;
+const PARKS_API_KEY = process.env.PARKS_API_KEY;
 
 app.use(cors());
 let locations={};
@@ -28,10 +29,9 @@ const handelLocation = (request,response)=>{
     const location = data.body[0];
     const locationData  = new Locations (city,location);
     locations[url] = locationData;
-    response.send(locationData);
-    // response.json(locationData );
+    // response.send(locationData);
+    response.json(locationData );
 
-   
 }) 
 .catch((error) => errorHandler(error, request, response));  
 }     
@@ -39,23 +39,49 @@ const handelLocation = (request,response)=>{
     function errorHandler(error, request, response) {
       response.status(500).send(error);
   }
+  // changes
     
-  
-  let weatherData = [];
-  const handelWeather=(request,response)=>{
-    const weather =require('./data/weather.json');
-    let weatherArr = weather.data;
+  app.get('/parks', handelPark);
+  function handelPark(request, response) {
+    const url = `https://developer.nps.gov/api/v1/parks?parkCode=acad&api_key=${PARKS_API_KEY}`;
+    superagent.get(url).then(parksData => {
+        const parks = parksData.body.data.map(data => {
+
+            return new Parks(data.fullName, data.addresses[0].line1 + data.addresses[0].city, data.entranceFees[0].cost, data.description, data.url)
+        });
+        response.status(200).json(parks);
+    }).catch((error) => {
+        console.error(error);
+        response.status(500).send('Something went wrong');
+    })
+}
+  // let weatherData = [];
+  async function handelWeather(request,response){
+    try{
+    let key = process.env.WEATHER_API_KEY;
+    const url=`https://api.weatherbit.io/v2.0/forecast/daily?city=Raleigh,NC&key=${key}`
+    const rawWeatherData = await superagent.get(url);
+    const weatherData = JSON.parse(rawWeatherData.text).data;
+
+    // let weatherArr = weather.data;
     // weatherArr.forEach(element => {
       //   let newW = new Weather(element.weather.description,element.valid_date);
       //   weatherData.push(newW)
       
       // use map 
-      weatherData= weatherArr.map(element => {
-        return new Weather(element.weather.description,element.valid_date);
+      const forecasts= weatherData.map(element => {
+        const description = element.weather.description;
+        const time = element.datetime;
+        return new Weather(description,time);
         
       })  
-      response.json(weatherData );
-    };  
+      response.json(forecasts );
+    }catch(error) {
+      console.error(error);
+      response.status(500).send('Something went wrong');
+  }
+    
+    }  
     const handelError = (request,response)=>{
       response.status(500).send('Sorry, something went wrong');
     };  
@@ -74,11 +100,19 @@ const handelLocation = (request,response)=>{
   
   
   // Weather Constructor
-  function Weather(forecast,time) {
-    this.forecast=forecast;
-    this.time=time; //.toDateString()
+  function Weather(description,valid_date) {
+    this.forecast=description;
+    this.time=valid_date; //.toDateString()
     
   }
+  // Park Constructor
+  function Parks(name, address, fee, description, url) {
+    this.name = name;
+    this.address = address;
+    this.fee = fee;
+    this.description = description;
+    this.url = url;
+}
   
   const handleRequest = (request, response) => {
     console.log(request.query);
